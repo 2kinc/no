@@ -12,6 +12,8 @@
 	var startTime = performance.now();
 	var lastCalledTime;
 	var fps;
+	var dispfps;
+	var lastSec = performance.now();
 
 	function updateSize () {
 	canvas.width = innerWidth * devicePixelRatio;
@@ -34,11 +36,12 @@
 	if(!lastCalledTime) {
      	lastCalledTime = performance.now();
      	fps = 0;
+		dispfps = fps;
      	return;
   	}
   	delta = (performance.now() - lastCalledTime)/1000;
-  	lastCalledTime = Date.now();
-  	fps = 1/delta;
+  	lastCalledTime = performance.now();
+  	fps = Math.round(1/delta);
 	
 	ctx.fillStyle = 'black';
 	ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -47,7 +50,7 @@
 	var t = performance.now();
 	if (t - startTime <= 3000) {
 	ctx.globalAlpha = 1-(t-startTime)/3000;
-	ctx.fillText('T and C to toggle and clear.', 4 * devicePixelRatio, canvas.height - 30);
+	ctx.fillText('T and C to toggle and clear.', 4 * devicePixelRatio, canvas.height - 36 * devicePixelRatio);
 	ctx.globalAlpha = 1;
 	}
 	if (stay)
@@ -55,7 +58,12 @@
 	else
 	ctx.fillText('Fading Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
 	
-	ctx.fillText(fps + 'FPS', 4 * devicePixelRatio, canvas.height - 6);
+	if (t - lastSec >= 1000) {
+		lastSec = t;
+		dispfps = fps;
+	}
+
+	ctx.fillText(dispfps + 'FPS', 4 * devicePixelRatio, canvas.height - 10 * devicePixelRatio);
 	
 	if (t - lastCleared <= 1000) {
 	ctx.globalAlpha = 1-(t-lastCleared)/1000;
