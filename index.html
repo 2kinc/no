@@ -9,7 +9,9 @@
 	var canvas = document.querySelector('canvas');
 	var stay = true;
 	var lastCleared;
-	var startTime = new Date().getTime();
+	var startTime = performance.now();
+	var lastCalledTime;
+	var fps;
 
 	function updateSize () {
 	canvas.width = innerWidth * devicePixelRatio;
@@ -28,21 +30,32 @@
 
 	function bobRoss () {
 	requestAnimationFrame(bobRoss);
-
+	
+	if(!lastCalledTime) {
+     	lastCalledTime = performance.now();
+     	fps = 0;
+     	return;
+  	}
+  	delta = (performance.now() - lastCalledTime)/1000;
+  	lastCalledTime = Date.now();
+  	fps = 1/delta;
+	
 	ctx.fillStyle = 'black';
 	ctx.fillRect(0,0,canvas.width,canvas.height);
 	ctx.font = 24 * devicePixelRatio + 'px Georgia';
 	ctx.fillStyle = 'white';
-	var t = new Date().getTime();
+	var t = performance.now();
 	if (t - startTime <= 3000) {
 	ctx.globalAlpha = 1-(t-startTime)/3000;
-	ctx.fillText('T and C to toggle and clear.', 4 * devicePixelRatio, canvas.height - 6);
+	ctx.fillText('T and C to toggle and clear.', 4 * devicePixelRatio, canvas.height - 30);
 	ctx.globalAlpha = 1;
 	}
 	if (stay)
 	ctx.fillText('Persistent Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
 	else
 	ctx.fillText('Fading Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
+	
+	ctx.fillText(fps + 'FPS', 4 * devicePixelRatio, canvas.height - 6);
 	
 	if (t - lastCleared <= 1000) {
 	ctx.globalAlpha = 1-(t-lastCleared)/1000;
@@ -82,7 +95,7 @@
 	var k = e.key.toLowerCase();
 	if (k == 'c') {
 	nos = [];
-	lastCleared = new Date().getTime();
+	lastCleared = performance.now();
 	}
 	if (k == 't') {
 	stay = !stay;
