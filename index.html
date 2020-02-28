@@ -9,6 +9,7 @@
 	var canvas = document.querySelector('canvas');
 	var stay = true;
 	var lastCleared;
+	var startTime = new Date().getTime();
 
 	function updateSize () {
 	canvas.width = innerWidth * devicePixelRatio;
@@ -32,11 +33,17 @@
 	ctx.fillRect(0,0,canvas.width,canvas.height);
 	ctx.font = 24 * devicePixelRatio + 'px Georgia';
 	ctx.fillStyle = 'white';
+	var t = new Date().getTime();
+	if (t - startTime <= 3000) {
+	ctx.globalAlpha = 1-(t-startTime)/3000;
+	ctx.fillText('T and C to toggle and clear.', 4 * devicePixelRatio, canvas.height - 6);
+	ctx.globalAlpha = 1;
+	}
 	if (stay)
 	ctx.fillText('Persistent Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
 	else
 	ctx.fillText('Fading Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
-	var t = new Date().getTime();
+	
 	if (t - lastCleared <= 1000) {
 	ctx.globalAlpha = 1-(t-lastCleared)/1000;
 	ctx.fillText('Cleared canvas.', 4 * devicePixelRatio, 48 * devicePixelRatio);
