@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+<title>can you code in word?</title>
+</head>
+<body style="margin: 0; overflow: hidden;">
+	<canvas></canvas>
+<script>
+	var canvas = document.querySelector('canvas');
+	var stay = true;
+	var lastCleared;
+
+	function updateSize () {
+	canvas.width = innerWidth * devicePixelRatio;
+	canvas.height = innerHeight * devicePixelRatio;
+	canvas.style.width = innerWidth + 'px';
+	canvas.style.height = innerHeight + 'px';
+	}
+	updateSize();
+	
+	
+	
+	var ctx = canvas.getContext('2d');
+	var mx = 0; 
+	var my = 0;
+	var nos = [];
+
+	function bobRoss () {
+	requestAnimationFrame(bobRoss);
+
+	ctx.fillStyle = 'black';
+	ctx.fillRect(0,0,canvas.width,canvas.height);
+	ctx.font = 24 * devicePixelRatio + 'px Georgia';
+	ctx.fillStyle = 'white';
+	if (stay)
+	ctx.fillText('Persistent Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
+	else
+	ctx.fillText('Fading Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
+	var t = new Date().getTime();
+	if (t - lastCleared <= 1000) {
+	ctx.globalAlpha = 1-(t-lastCleared)/1000;
+	ctx.fillText('Cleared canvas.', 4 * devicePixelRatio, 48 * devicePixelRatio);
+	ctx.globalAlpha = 1;
+	}
+
+	nos.forEach(function (no, i) {
+	ctx.globalAlpha = no.opacity;
+	ctx.fillStyle = 'white';
+	ctx.font = no.radius * devicePixelRatio + 'px Georgia';
+	ctx.fillText('no', no.x * devicePixelRatio, no.y * devicePixelRatio);
+	if (!stay) {
+	no.radius += 3;
+	no.opacity -= 0.01;
+	}
+	if (no.opacity <= 0) {
+	nos.splice(i, 1);
+	}
+	ctx.globalAlpha = 1;
+	});
+	}
+
+	window.addEventListener('resize', updateSize);
+	window.addEventListener('mousemove', function (e){mx = e.clientX; my = e.clientY;});
+	window.addEventListener('click', function (e){
+	if (!stay)
+	nos.push({x:e.clientX, y:e.clientY,radius:0,opacity:1});
+	else 
+	nos.push({x:e.clientX, y:e.clientY,radius:10,opacity:1});
+	});
+	window.addEventListener('keyup', function (e) {
+	var k = e.key.toLowerCase();
+	if (k == 'c') {
+	nos = [];
+	lastCleared = new Date().getTime();
+	}
+	if (k == 't') {
+	nos = [];
+	stay = !stay;
+	lastCleared = new Date().getTime();
+	}
+	});
+
+	bobRoss();
+</script>
+</body>
+</html>
