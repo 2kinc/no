@@ -58,6 +58,10 @@
 	if (!stay) {
 	no.radius += 3;
 	no.opacity -= 0.01;
+	} else {
+	if (no.radius > 10) {
+	ctx.splice(i, 1);
+	}
 	}
 	if (no.opacity <= 0) {
 	nos.splice(i, 1);
