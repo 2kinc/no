@@ -128,7 +128,7 @@
 
 		window.addEventListener('resize', updateSize);
 		window.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
-		window.addEventListener('click', function (e) {
+		window.addEventListener('mousedown', function (e) {
 			if (!stay)
 				nos.push({ x: e.clientX, y: e.clientY, radius: 0, opacity: 1 });
 			else
