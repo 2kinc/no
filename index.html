@@ -1,116 +1,165 @@
 <!doctype html>
 <html>
+
 <head>
-<title>can you code in word?</title>
+	<title>can you code in ms word?</title>
 </head>
+
 <body style="margin: 0; overflow: hidden;">
 	<canvas></canvas>
-<script>
-	var canvas = document.querySelector('canvas');
-	var stay = true;
-	var lastCleared;
-	var startTime = performance.now();
-	var lastCalledTime;
-	var fps;
-	var dispfps;
-	var lastSec = performance.now();
+	<!-- The core Firebase JS SDK is always required and must be listed first -->
+	<script src="https://www.gstatic.com/firebasejs/7.9.2/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.9.2/firebase-firestore.js"></script>
 
-	function updateSize () {
-	canvas.width = innerWidth * devicePixelRatio;
-	canvas.height = innerHeight * devicePixelRatio;
-	canvas.style.width = innerWidth + 'px';
-	canvas.style.height = innerHeight + 'px';
-	}
-	updateSize();
-	
-	
-	
-	var ctx = canvas.getContext('2d');
-	var mx = 0; 
-	var my = 0;
-	var nos = [];
+	<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+	<script src="https://www.gstatic.com/firebasejs/7.9.2/firebase-analytics.js"></script>
 
-	function bobRoss () {
-	requestAnimationFrame(bobRoss);
-	
-	if(!lastCalledTime) {
-     	lastCalledTime = performance.now();
-     	fps = 0;
-		dispfps = fps;
-     	return;
-  	}
-  	delta = (performance.now() - lastCalledTime)/1000;
-  	lastCalledTime = performance.now();
-  	fps = Math.round(1/delta);
-	
-	ctx.fillStyle = 'black';
-	ctx.fillRect(0,0,canvas.width,canvas.height);
-	ctx.font = 24 * devicePixelRatio + 'px Georgia';
-	ctx.fillStyle = 'white';
-	var t = performance.now();
-	if (t - startTime <= 3000) {
-	ctx.globalAlpha = 1-(t-startTime)/3000;
-	ctx.fillText('T and C to toggle and clear.', 4 * devicePixelRatio, canvas.height - 36 * devicePixelRatio);
-	ctx.globalAlpha = 1;
-	}
-	if (stay)
-	ctx.fillText('Persistent Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
-	else
-	ctx.fillText('Fading Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
-	
-	if (t - lastSec >= 1000) {
-		lastSec = t;
-		dispfps = fps;
-	}
+	<script>
+		// Your web app's Firebase configuration
+		var firebaseConfig = {
+			apiKey: "AIzaSyBjEGcZ2VDePO5cwOK2aAAnIyB_MrGdxZE",
+			authDomain: "word-no.firebaseapp.com",
+			databaseURL: "https://word-no.firebaseio.com",
+			projectId: "word-no",
+			storageBucket: "word-no.appspot.com",
+			messagingSenderId: "112601233436",
+			appId: "1:112601233436:web:8f9f65fc826fb9469447d9",
+			measurementId: "G-VPC9ZNQ5NN"
+		};
+		// Initialize Firebase
+		firebase.initializeApp(firebaseConfig);
+		firebase.analytics();
+	</script>
+	<script>
+		var db = firebase.firestore();
+		var onlineClicks;
+		var clicksDoc = db.doc('stats/clicks');
+		var canvas = document.querySelector('canvas');
+		var stay = true;
+		var lastCleared;
+		var startTime = performance.now();
+		var lastCalledTime;
+		var fps;
+		var dispfps;
+		var lastSec = performance.now();
 
-	ctx.fillText(dispfps + 'FPS', 4 * devicePixelRatio, canvas.height - 10 * devicePixelRatio);
-	
-	if (t - lastCleared <= 1000) {
-	ctx.globalAlpha = 1-(t-lastCleared)/1000;
-	ctx.fillText('Cleared canvas.', 4 * devicePixelRatio, 48 * devicePixelRatio);
-	ctx.globalAlpha = 1;
-	}
+		function updateSize() {
+			canvas.width = innerWidth * devicePixelRatio;
+			canvas.height = innerHeight * devicePixelRatio;
+			canvas.style.width = innerWidth + 'px';
+			canvas.style.height = innerHeight + 'px';
+		}
+		updateSize();
 
-	nos.forEach(function (no, i) {
-	ctx.globalAlpha = no.opacity;
-	ctx.fillStyle = 'white';
-	ctx.font = no.radius * devicePixelRatio + 'px Georgia';
-	ctx.fillText('no', no.x * devicePixelRatio, no.y * devicePixelRatio);
-	if (!stay) {
-	no.radius += 3;
-	no.opacity -= 0.01;
-	} else {
-	if (no.radius > 10) {
-	nos.splice(i, 1);
-	}
-	}
-	if (no.opacity <= 0) {
-	nos.splice(i, 1);
-	}
-	ctx.globalAlpha = 1;
-	});
-	}
+		clicksDoc.onSnapshot(function (doc) {
+			onlineClicks = doc.data().clicks;
+		});
 
-	window.addEventListener('resize', updateSize);
-	window.addEventListener('mousemove', function (e){mx = e.clientX; my = e.clientY;});
-	window.addEventListener('click', function (e){
-	if (!stay)
-	nos.push({x:e.clientX, y:e.clientY,radius:0,opacity:1});
-	else 
-	nos.push({x:e.clientX, y:e.clientY,radius:10,opacity:1});
-	});
-	window.addEventListener('keyup', function (e) {
-	var k = e.key.toLowerCase();
-	if (k == 'c') {
-	nos = [];
-	lastCleared = performance.now();
-	}
-	if (k == 't') {
-	stay = !stay;
-	}
-	});
+		var ctx = canvas.getContext('2d');
+		var mx = 0;
+		var my = 0;
+		var nos = [];
 
-	bobRoss();
-</script>
+		function bobRoss() {
+			requestAnimationFrame(bobRoss);
+
+			if (!lastCalledTime) {
+				lastCalledTime = performance.now();
+				fps = 0;
+				dispfps = fps;
+				return;
+			}
+			delta = (performance.now() - lastCalledTime) / 1000;
+			lastCalledTime = performance.now();
+			fps = Math.round(1 / delta);
+
+			ctx.fillStyle = 'black';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			ctx.font = 24 * devicePixelRatio + 'px Georgia';
+			ctx.fillStyle = 'white';
+			var t = performance.now();
+			if (t - startTime <= 3000) {
+				ctx.globalAlpha = 1 - (t - startTime) / 3000;
+				ctx.fillText('Press T and C to toggle / clear.', 4 * devicePixelRatio, canvas.height - 62 * devicePixelRatio);
+				ctx.globalAlpha = 1;
+			}
+			if (stay)
+				ctx.fillText('Persistent Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
+			else
+				ctx.fillText('Fading Nos', 4 * devicePixelRatio, 24 * devicePixelRatio);
+
+			if (t - lastSec >= 1000) {
+				lastSec = t;
+				dispfps = fps;
+			}
+
+			if (!onlineClicks)
+				ctx.fillText('Syncing online data...', 4 * devicePixelRatio, canvas.height - 36 * devicePixelRatio);
+			else
+				ctx.fillText("We've generated " + onlineClicks + " nos.", 4 * devicePixelRatio, canvas.height - 36 * devicePixelRatio);
+			ctx.fillText(dispfps + 'FPS', 4 * devicePixelRatio, canvas.height - 10 * devicePixelRatio);
+
+			if (t - lastCleared <= 1000) {
+				ctx.globalAlpha = 1 - (t - lastCleared) / 1000;
+				ctx.fillText('Cleared canvas.', 4 * devicePixelRatio, 48 * devicePixelRatio);
+				ctx.globalAlpha = 1;
+			}
+
+			nos.forEach(function (no, i) {
+				ctx.globalAlpha = no.opacity;
+				ctx.fillStyle = 'white';
+				ctx.font = no.radius * devicePixelRatio + 'px Georgia';
+				ctx.fillText('no', no.x * devicePixelRatio, no.y * devicePixelRatio);
+				if (!stay) {
+					no.radius += 3;
+					no.opacity -= 0.01;
+				} else {
+					if (no.radius > 10) {
+						nos.splice(i, 1);
+					}
+				}
+				if (no.opacity <= 0) {
+					nos.splice(i, 1);
+				}
+				ctx.globalAlpha = 1;
+			});
+		}
+
+		window.addEventListener('resize', updateSize);
+		window.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+		window.addEventListener('click', function (e) {
+			if (!stay)
+				nos.push({ x: e.clientX, y: e.clientY, radius: 0, opacity: 1 });
+			else
+				nos.push({ x: e.clientX, y: e.clientY, radius: 10, opacity: 1 });
+			if (onlineClicks) {
+				clicksDoc.set({
+					clicks: onlineClicks + 1
+				});
+			} else {
+				clicksDoc.get().then(function (doc) {
+					clicksDoc.set({
+						clicks: doc.data().clicks + 1
+					});
+				}).catch(function (error) {
+					console.log("Error getting online clicks:", error);
+				});
+			}
+		});
+		window.addEventListener('keyup', function (e) {
+			var k = e.key.toLowerCase();
+			if (k == 'c') {
+				nos = [];
+				lastCleared = performance.now();
+			}
+			if (k == 't') {
+				stay = !stay;
+			}
+		});
+
+		bobRoss();
+	</script>
 </body>
+
 </html>
