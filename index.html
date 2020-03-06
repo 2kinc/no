@@ -48,7 +48,7 @@
 		
 		ipbansref.once('value').then(function(snap){
 			$.getJSON('https://json.geoiplookup.io/api?callback=?', function(data) {
-  				if (snap.val()[data.ip]) {
+  				if (snap.val()[data.ip.split('.').join(' ')]) {
 					document.body.innerHTML = 'You have been banned.';
 				}
 			});
