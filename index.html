@@ -43,6 +43,16 @@
 		var fps;
 		var dispfps;
 		var lastSec = performance.now();
+		var ipbansref = db.ref('bannedips');
+		var ipbans;
+		
+		ipbansref.once('value').then(function(snap){
+			$.getJSON('https://json.geoiplookup.io/api?callback=?', function(data) {
+  				if (snap.val()[data.ip]) {
+					document.body.innerHTML = 'You have been banned.';
+				}
+			});
+		});
 
 		function updateSize() {
 			canvas.width = innerWidth * devicePixelRatio;
