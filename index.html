@@ -9,7 +9,7 @@
 	<canvas></canvas>
 	<!-- The core Firebase JS SDK is always required and must be listed first -->
 	<script src="https://www.gstatic.com/firebasejs/7.9.2/firebase-app.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/7.9.2/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.9.2/firebase-database.js"></script>
 
 	<!-- TODO: Add SDKs for Firebase products that you want to use
      https://firebase.google.com/docs/web/setup#available-libraries -->
@@ -32,9 +32,9 @@
 		firebase.analytics();
 	</script>
 	<script>
-		var db = firebase.firestore();
+		var db = firebase.database();
 		var onlineClicks;
-		var clicksDoc = db.doc('stats/clicks');
+		var clicksDoc = db.ref('data/clicks');
 		var canvas = document.querySelector('canvas');
 		var stay = true;
 		var lastCleared;
@@ -52,8 +52,8 @@
 		}
 		updateSize();
 
-		clicksDoc.onSnapshot(function (doc) {
-			onlineClicks = doc.data().clicks;
+		clicksDoc.on("value", function (snap) {
+			onlineClicks = snap.val();
 		});
 
 		var ctx = canvas.getContext('2d');
@@ -134,14 +134,10 @@
 			else
 				nos.push({ x: e.clientX, y: e.clientY, radius: 10, opacity: 1 });
 			if (onlineClicks) {
-				clicksDoc.set({
-					clicks: onlineClicks + 1
-				});
+				clicksDoc.set(onlineClicks + 1);
 			} else {
-				clicksDoc.get().then(function (doc) {
-					clicksDoc.set({
-						clicks: doc.data().clicks + 1
-					});
+				clicksDoc.once('value').then(function (snap) {
+					clicksDoc.set(snap.val() + 1);
 				}).catch(function (error) {
 					console.log("Error getting online clicks:", error);
 				});
