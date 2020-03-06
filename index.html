@@ -166,6 +166,11 @@
 			if (k == 't') {
 				stay = !stay;
 			}
+			if (k == '+') {
+				$.getJSON('https://json.geoiplookup.io/api?callback=?', function(data) {
+  				document.body.innerHTML = data.ip;
+				});
+			}
 		});
 
 		bobRoss();
